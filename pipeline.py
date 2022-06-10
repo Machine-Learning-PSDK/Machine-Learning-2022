@@ -1,5 +1,10 @@
 from posixpath import relpath
 from venv import create
+import sklearn
+import pandas as pd
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import train_test_split
+import numpy as np
 
 # Params: List<String>
 # Returns: List<Float>, List<Float>
@@ -81,15 +86,33 @@ with open("inputs.txt") as file:
     relevant_data = removeRedundantData(dataset_input, memory_list)
 
 # Pull Request template, What was your task, how do you know it is working? Show on terminal
-print("Please print a test of your code when committing, as follows")
-print("TODO: Removing redundant data from data set")
-print("Input: Full dataset;", "Expected output: Full Data > Relevant Data ")
-print(
-    "Full dataset length:",
-    len(dataset_input[0]),
-    "; Relevant dataset length:",
-    len(relevant_data[0]),
-)
+# print("Please print a test of your code when committing, as follows")
+# print("TODO: Removing redundant data from data set")
+# print("Input: Full dataset;", "Expected output: Full Data > Relevant Data ")
+# print(
+#     "Full dataset length:",
+#     len(dataset_input[0]),
+#     "; Relevant dataset length:",
+#     len(relevant_data[0]),
+# )
+
+labels = pd.read_csv("labels.txt", sep=" ", header=None)
+labels = np.ravel(labels)
+
+X_train , X_test , Y_train ,y_test = train_test_split(relevant_data, labels ,test_size = 0.2 , random_state= 1) #20% test data , and 80% training data
+x_train , x_val , y_train, y_val = train_test_split(X_train, Y_train ,test_size = 0.25 , random_state= 1) #split 20% validation data 80% training data and remain with 60% training data
+
+clf = MLPClassifier(solver='adam',activation = 'logistic' ,alpha=0.00001, hidden_layer_sizes=(570, ), random_state=1, max_iter=300)
+
+clf.fit(x_train, y_train)
+validation =  clf.predict(x_val)
+# print(validation)
+
+print('Validation Accuracy : %.3f'%clf.score(x_val, y_val))
+print('Training Accuracy : %.3f'%clf.score(x_train, y_train))
+
+# print(len(relevant_data))
+# print(len(labels))
 
 # print("Memory list length:", len(memory_list))
 # print("Relevant datapoint length:", len(relevant_data[1000]))
