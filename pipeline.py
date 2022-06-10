@@ -102,7 +102,7 @@ labels = np.ravel(labels)
 X_train , X_test , Y_train ,y_test = train_test_split(relevant_data, labels ,test_size = 0.2 , random_state= 1) #20% test data , and 80% training data
 x_train , x_val , y_train, y_val = train_test_split(X_train, Y_train ,test_size = 0.25 , random_state= 1) #split 20% validation data 80% training data and remain with 60% training data
 
-clf = MLPClassifier(solver='adam',activation = 'logistic' ,alpha=0.00001, hidden_layer_sizes=(570, ), random_state=1, max_iter=300)
+clf = MLPClassifier(solver='adam',activation = 'logistic' ,alpha=0.00001, hidden_layer_sizes=(570,), random_state=1, max_iter=300)
 
 clf.fit(x_train, y_train)
 validation =  clf.predict(x_val)
