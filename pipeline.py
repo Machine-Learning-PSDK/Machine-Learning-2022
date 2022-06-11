@@ -105,11 +105,15 @@ x_train , x_val , y_train, y_val = train_test_split(X_train, Y_train ,test_size 
 clf = MLPClassifier(solver='adam',activation = 'logistic' ,alpha=0.00001, hidden_layer_sizes=(570,), random_state=1, max_iter=300)
 
 clf.fit(x_train, y_train)
-validation =  clf.predict(x_val)
-# print(validation)
+validation =  clf.predict(np.reshape(x_val[0], (1, -1)))
+print(str(validation))
 
-print('Validation Accuracy : %.3f'%clf.score(x_val, y_val))
-print('Training Accuracy : %.3f'%clf.score(x_train, y_train))
+# print(np.reshape(x_val[0], (1, -1)))
+
+# print(clf.coefs_[0])
+
+# print('Validation Accuracy : %.3f'%clf.score(x_val, y_val))
+# print('Training Accuracy : %.3f'%clf.score(x_train, y_train))
 
 # print(len(relevant_data))
 # print(len(labels))
