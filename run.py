@@ -61,13 +61,15 @@ def removeRedundantData(dataset_input, memory_list):
 
 
 # Functions Ends
-# Pipeline Starts
+
+# region Pipeline Starts
 
 # Declarations.
 dataset_input = []
 dataset_class = []
 count = 0  # count number of rows we've ran through
 
+# Open up the data and clean it
 with open("inputs.txt") as file:
 
     memory_list = []  # Just to store the memory list, indexes to keep
@@ -89,31 +91,16 @@ with open("inputs.txt") as file:
 
     relevant_data = removeRedundantData(dataset_input, memory_list)
 
-# Pull Request template, What was your task, how do you know it is working? Show on terminal
-# print("Please print a test of your code when committing, as follows")
-# print("TODO: Removing redundant data from data set")
-# print("Input: Full dataset;", "Expected output: Full Data > Relevant Data ")
-# print(
-#     "Full dataset length:",
-#     len(dataset_input[0]),
-#     "; Relevant dataset length:",
-#     len(relevant_data[0]),
-# )
-
-# print("Memory list length:", len(memory_list))
-# print("Relevant datapoint length:", len(relevant_data[1000]))
-# print("Length of full dataset:", len(dataset_input))
-# print("Length of datapoint:", len(dataset_input[0]))
-# print("Datapoint row 0 zolumn zero:", dataset_input[0][0])
-
-# Pipeline Ends
-
+# Relevant data is cleaned data, full scope
 
 # inputs = pd.read_csv("inputs.txt", sep=" ", header=None)
 
+
 from sklearn.preprocessing import StandardScaler
 sc = StandardScaler()
-inputs = sc.fit_transform(dataset_input)
+print(len(relevant_data))
+inputs = sc.fit_transform(relevant_data)
+
 
 labels = pd.read_csv("labels.txt", sep=" ", header=None)
 
@@ -122,35 +109,44 @@ ohe = OneHotEncoder()
 labels = ohe.fit_transform(labels).toarray()
 
 Input_Train , X_Test , Y_train ,Y_test = train_test_split(inputs, labels ,test_size = 0.2 , random_state= 1 ,shuffle=True)
+print("Input Data size", len(Input_Train))
+# Split the whole 
 X_train , X_val , Y_train, Y_val = train_test_split(Input_Train, Y_train ,test_size = 0.25 , random_state= 1 ,shuffle=True)
 
 model = Sequential()
-model.add(Dense(1200, activation='sigmoid', input_dim=2352))
+# Hardcoded, 
+# TODO: Justify why we use these numbers (For the pdf)
+# Dense( int= next hidden layer dimensions, activation function, input dimensions )
+# TODO: Test different 
+model.add(Dense(570, activation='sigmoid', input_dim=len(relevant_data[0]))) # This defines the dimensions of the input dimension and 1st hidden layer
 model.add(Dense(570, activation='sigmoid'))
 model.add(Dense(570, activation='sigmoid'))
-model.add(Dense(10, activation='sigmoid'))
+model.add(Dense(570, activation='sigmoid'))
+model.add(Dense(570, activation='sigmoid'))
+model.add(Dense(570, activation='sigmoid'))
+model.add(Dense(10, activation='sigmoid'))  # This defines output layer dimensions
 
-model.load_weights('my_model_weights.h5')
+# model.load_weights('my_model_weights.h5')
 # Compile the model
 model.compile(optimizer='adam', 
               loss='categorical_crossentropy', 
               metrics=['accuracy'])
 
-model.fit(X_train, Y_train, validation_data = (X_val, Y_val)  ,  epochs=100,  batch_size=64)
+model.fit(X_train, Y_train, validation_data = (X_val, Y_val)  ,  epochs=10,  batch_size=64)
 
-model.save_weights('model_weights.h5')
+# model.save_weights('model_weights.h5')
 
-y_pred = model.predict(X_Test)
-#Converting predictions to label
-pred = list()
-for i in range(len(y_pred)):
-    pred.append(np.argmax(y_pred[i]))
-#Converting one hot encoded test label to label
-test = list()
-for i in range(len(Y_test)):
-    test.append(np.argmax(Y_test[i]))
+# y_pred = model.predict(X_Test)
+# #Converting predictions to label
+# pred = list()
+# for i in range(len(y_pred)):
+#     pred.append(np.argmax(y_pred[i]))
+# #Converting one hot encoded test label to label
+# test = list()
+# for i in range(len(Y_test)):
+#     test.append(np.argmax(Y_test[i]))
     
-from sklearn.metrics import accuracy_score
-a = accuracy_score(pred,test)
-print('Accuracy is:', a*100)    
+# from sklearn.metrics import accuracy_score
+# a = accuracy_score(pred,test)
+# print('Accuracy is:', a*100)    
 
