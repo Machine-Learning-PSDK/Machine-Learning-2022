@@ -99,10 +99,13 @@ with open("inputs.txt") as file:
     
     plot_list = []
     # Track trend for particular feature
+    # If feature isn't zero, add it to the plot
     for i in range(len(relevant_data)):
-        plot_list.append(relevant_data[i][0])
+        if (relevant_data[i][0] != 0):
+            plot_list.append(relevant_data[i][0])
     
-    
+    print("How many times does this feature not equal zero?: ",len(plot_list))
+    print("What value does this one thing equal:",plot_list)
     plt.plot(plot_list)
     plt.show()
     
@@ -121,7 +124,8 @@ labels = pd.read_csv("labels.txt", sep=" ", header=None)
 from sklearn.preprocessing import OneHotEncoder
 ohe = OneHotEncoder()
 labels = ohe.fit_transform(labels).toarray()
-print("Samples:", len(relevant_data),"Features:",len(relevant_data[0]))
+print("Samples:", len(relevant_data), "Labels",len(labels),"Features:",len(relevant_data[0]))
+
 
 x_Train , X_Test , Y_train ,Y_test = train_test_split(inputs, labels ,test_size = 0.2 , random_state= 1 ,shuffle=True)
 # Split the whole 
@@ -162,7 +166,7 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, epsilon=0.
               loss='categorical_crossentropy', 
               metrics=['accuracy'])
 
-model.fit(X_train, Y_train,  epochs=300,  batch_size=25)
+model.fit(X_train, Y_train,  epochs=30,  batch_size=25)
 
 # model.save_weights('model_weights.h5')
 
