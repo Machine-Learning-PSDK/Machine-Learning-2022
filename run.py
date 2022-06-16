@@ -103,11 +103,9 @@ inputs = sc.fit_transform(relevant_data)
 labels = pd.read_csv("labels.txt", sep=" ", header=None)
 labels = LabelEncoder().fit_transform(labels)
 
-print(labels.shape)
-
-# from sklearn.preprocessing import OneHotEncoder
-# ohe = OneHotEncoder()
-# labels = ohe.fit_transform(labels).toarray()
+from sklearn.preprocessing import OneHotEncoder
+ohe = OneHotEncoder()
+labels = ohe.fit_transform(labels).toarray()
 
 x_Train , X_Test , Y_train ,Y_test = train_test_split(inputs, labels ,test_size = 0.2 , random_state= 1 ,shuffle=True)
 # Split the whole 
