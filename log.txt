@@ -1,0 +1,11 @@
+Test 1: Accuracy= 0.9833 ; Val_Accuracy= 0.7525 ; Test Accuracy= 72.75
+    1 Relu
+    2 Relu
+    1 Relu
+    4 Relu
+    2 Relu
+    1 Relu
+    10* softmax
+
+Test 2:
+
