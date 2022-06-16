@@ -97,13 +97,13 @@ with open("inputs.txt") as file:
     
     
     
-    plot_list = []
-    # Track trend for particular feature
-    for i in range(len(relevant_data)):
-        plot_list.append(relevant_data[i][0])
+    # plot_list = []
+    # # Track trend for particular feature
+    # for i in range(len(relevant_data)):
+    #     plot_list.append(relevant_data[i][0])
     
     
-    plt.plot(plot_list)
+    plt.plot(relevant_data[0])
     plt.show()
     
 
@@ -121,7 +121,7 @@ labels = pd.read_csv("labels.txt", sep=" ", header=None)
 from sklearn.preprocessing import OneHotEncoder
 ohe = OneHotEncoder()
 labels = ohe.fit_transform(labels).toarray()
-print("Samples:", len(relevant_data),"Features:",len(relevant_data[0]))
+print(len(relevant_data[0]))
 
 x_Train , X_Test , Y_train ,Y_test = train_test_split(inputs, labels ,test_size = 0.2 , random_state= 1 ,shuffle=True)
 # Split the whole 
@@ -143,12 +143,12 @@ model = Sequential()
 # # model.add(Dense(relevant_dimensions/8, activation='relu'))
 # model.add(Dense(10, activation='softmax'))  # This defines output layer dimensions
 
-relevant_dimensions= len(relevant_data[0])
-model.add(Dense(relevant_dimensions//8, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
-model.add(Dense(relevant_dimensions//8, activation='sigmoid'))
+# relevant_dimensions= len(relevant_data[0])
+# model.add(Dense(relevant_dimensions//8, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
+# model.add(Dense(relevant_dimensions//8, activation='sigmoid'))
 
-model.add(Dropout(0.5))
-model.add(Dense(10, activation='softmax'))
+# model.add(Dropout(0.5))
+# model.add(Dense(10, activation='softmax'))
 # model.add(Dense(relevant_dimensions/2, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
 # model.add(Dense(relevant_dimensions/4, activation='relu'))
 # model.add(Dense(10, activation='softmax'))  # This defines output layer dimensions
@@ -158,39 +158,39 @@ model.add(Dense(10, activation='softmax'))
 
 
 # TODO: Justify why we picked these specific optimizer, loss and metric parameters
-model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, epsilon=0.004, amsgrad=True), 
-              loss='categorical_crossentropy', 
-              metrics=['accuracy'])
+# model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, epsilon=0.004, amsgrad=True), 
+#               loss='categorical_crossentropy', 
+#               metrics=['accuracy'])
 
-model.fit(X_train, Y_train,  epochs=300,  batch_size=25)
+# model.fit(X_train, Y_train,  epochs=300,  batch_size=25)
 
-# model.save_weights('model_weights.h5')
+# # model.save_weights('model_weights.h5')
 
-y_pred = model.predict(X_val)
-#Converting predictions to label
-pred = list()
-for i in range(len(y_pred)):
-    pred.append(np.argmax(y_pred[i]))
-#Converting one hot encoded test label to label
-test = list()
-for i in range(len(Y_val)):
-    test.append(np.argmax(Y_val[i]))
+# y_pred = model.predict(X_val)
+# #Converting predictions to label
+# pred = list()
+# for i in range(len(y_pred)):
+#     pred.append(np.argmax(y_pred[i]))
+# #Converting one hot encoded test label to label
+# test = list()
+# for i in range(len(Y_val)):
+#     test.append(np.argmax(Y_val[i]))
     
-from sklearn.metrics import accuracy_score
-a = accuracy_score(pred,test)
-print('[Validation] Accuracy is:', a*100)
+# from sklearn.metrics import accuracy_score
+# a = accuracy_score(pred,test)
+# print('[Validation] Accuracy is:', a*100)
 
-y_pred = model.predict(X_Test)
-#Converting predictions to label
-pred = list()
-for i in range(len(y_pred)):
-    pred.append(np.argmax(y_pred[i]))
-#Converting one hot encoded test label to label
-test = list()
-for i in range(len(Y_test)):
-    test.append(np.argmax(Y_test[i]))
+# y_pred = model.predict(X_Test)
+# #Converting predictions to label
+# pred = list()
+# for i in range(len(y_pred)):
+#     pred.append(np.argmax(y_pred[i]))
+# #Converting one hot encoded test label to label
+# test = list()
+# for i in range(len(Y_test)):
+#     test.append(np.argmax(Y_test[i]))
     
-from sklearn.metrics import accuracy_score
-b = accuracy_score(pred,test)
-print('[Testing] Accuracy is:', b*100)    
+# from sklearn.metrics import accuracy_score
+# b = accuracy_score(pred,test)
+# print('[Testing] Accuracy is:', b*100)    
 
