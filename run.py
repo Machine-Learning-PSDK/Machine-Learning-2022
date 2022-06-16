@@ -101,7 +101,6 @@ sc = StandardScaler()
 inputs = sc.fit_transform(relevant_data)
 
 labels = pd.read_csv("labels.txt", sep=" ", header=None)
-labels = LabelEncoder().fit_transform(labels)
 
 from sklearn.preprocessing import OneHotEncoder
 ohe = OneHotEncoder()
