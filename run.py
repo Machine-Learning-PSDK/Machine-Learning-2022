@@ -10,6 +10,7 @@ from keras.layers import Dropout
 import tensorflow as tf
 from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
+import math
 
 # Params: List<String>
 # Returns: List<Float>, List<Float>
@@ -61,6 +62,35 @@ def removeRedundantData(dataset_input, memory_list):
     return relevant_data
 
 
+# def trackTrendPerFeature(relevant_data, labels, index):
+#     plot_list = []    
+#     # We have 1917 relevant features.
+#     # How does it trend across 2000 datapoints
+#     # Track trend for particular feature (in this case feature[0])
+#     # If feature isn't zero, track it's index in the dataset and record the feature 
+    
+#     for i in range(len(relevant_data)):
+#         feature = relevant_data[i][index]
+        
+#         if (feature != 0):
+#             val_to_append =(i ,feature)
+#             plot_list = np.append( plot_list, val_to_append )
+            
+#             print("Data point at index", i ,"belongs to class", labels[i])
+#             print(plot_list)
+        
+#     index_list = []
+#     value_list = []
+#     for i in range(len(plot_list)):
+#         if (i%2 != 0 ):
+#             value_list.append(plot_list[i])
+#         else: index_list.append(plot_list[i])
+    
+    
+#     return [index_list, value_list]
+
+    
+    
 
 
 # Functions Ends
@@ -73,6 +103,8 @@ dataset_class = []
 count = 0  # count number of rows we've ran through
 
 # Open up the data and clean it
+
+labels = pd.read_csv("labels.txt", sep=" ", header=None)
 with open("inputs.txt") as file:
 
     memory_list = []  # Just to store the memory list, indexes to keep
@@ -95,41 +127,31 @@ with open("inputs.txt") as file:
     relevant_data = removeRedundantData(dataset_input, memory_list)
     #TODO: Iterate through index 0, and find trend for relevant_data[i][0]
     
-    
-    
-    plot_list = []
-    # Track trend for particular feature
-    # If feature isn't zero, add it to the plot
-    for i in range(len(relevant_data)):
-        if (relevant_data[i][0] != 0):
-            plot_list.append(relevant_data[i][0])
-    
-    print("How many times does this feature not equal zero?: ",len(plot_list))
-    print("What value does this one thing equal:",plot_list)
-    plt.plot(plot_list)
-    plt.show()
+    # data_to_plot = trackTrendPerFeature(relevant_data, labels, 2)
+    # plt.scatter(data_to_plot[0], data_to_plot[1] )
+    # plt.ylabel("Feature 77 value")
+    # plt.xlabel("Index in dataset")
+    # plt.show()
     
 
 # Relevant data is cleaned data, full scope
 
-# inputs = pd.read_csv("inputs.txt", sep=" ", header=None)
 
 
 from sklearn.preprocessing import StandardScaler
 sc = StandardScaler()
 inputs = sc.fit_transform(relevant_data)
 
-labels = pd.read_csv("labels.txt", sep=" ", header=None)
 
-from sklearn.preprocessing import OneHotEncoder
-ohe = OneHotEncoder()
-labels = ohe.fit_transform(labels).toarray()
-print("Samples:", len(relevant_data), "Labels",len(labels),"Features:",len(relevant_data[0]))
-
+# from sklearn.preprocessing import OneHotEncoder
+# ohe = OneHotEncoder()
+# labels = ohe.fit_transform(labels).toarray()
 
 x_Train , X_Test , Y_train ,Y_test = train_test_split(inputs, labels ,test_size = 0.2 , random_state= 1 ,shuffle=True)
 # Split the whole 
 X_train , X_val , Y_train, Y_val = train_test_split(x_Train, Y_train ,test_size = 0.25 , random_state= 1 ,shuffle=True)
+
+print(Y_val.shape)
 
 model = Sequential()
 # Hardcoded, 
@@ -138,35 +160,19 @@ model = Sequential()
 # TODO: Test different types and record values
 # TODO: Justify choice of layer type "Dense" has alternatives
 
-
-
-# relevant_dimensions= len(relevant_data[0])
-# model.add(Dense(558, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
-# # model.add(Dense(relevant_dimensions/2, activation='relu'))
-# # model.add(Dense(relevant_dimensions/4, activation='relu'))
-# # model.add(Dense(relevant_dimensions/8, activation='relu'))
-# model.add(Dense(10, activation='softmax'))  # This defines output layer dimensions
-
 relevant_dimensions= len(relevant_data[0])
-model.add(Dense(relevant_dimensions//8, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
-model.add(Dense(relevant_dimensions//8, activation='sigmoid'))
-
-model.add(Dropout(0.5))
+model.add(Dense(relevant_dimensions//2, activation='relu', input_dim=relevant_dimensions, kernel_initializer='he_uniform')) # This defines the dimensions of the input dimension and 1st hidden layer
+model.add(Dropout(0.5)) # We added drop out as half to reduce the underfitting.
+model.add(Dense(relevant_dimensions//19, activation='relu', kernel_initializer='he_uniform'))
+model.add(Dropout(0.5)) # We added drop out as half to reduce the underfitting.
 model.add(Dense(10, activation='softmax'))
-# model.add(Dense(relevant_dimensions/2, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
-# model.add(Dense(relevant_dimensions/4, activation='relu'))
-# model.add(Dense(10, activation='softmax'))  # This defines output layer dimensions
-# model.load_weights('my_model_weights.h5')
-# Compile the model
-
-
 
 # TODO: Justify why we picked these specific optimizer, loss and metric parameters
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, epsilon=0.004, amsgrad=True), 
-              loss='categorical_crossentropy', 
+              loss='sparse_categorical_crossentropy', 
               metrics=['accuracy'])
 
-model.fit(X_train, Y_train,  epochs=30,  batch_size=25)
+model.fit(X_train, Y_train,  epochs=90,  batch_size=25)
 
 # model.save_weights('model_weights.h5')
 
