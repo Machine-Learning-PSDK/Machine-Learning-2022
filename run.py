@@ -1,5 +1,6 @@
 # Importing the libraries
 from cProfile import label
+from inspect import ClassFoundException
 from os import remove, stat
 from tempfile import TemporaryDirectory
 from turtle import shape
@@ -70,6 +71,23 @@ def createMemoryList(dataset_input, memory_list):
             # Don't update element in memory list if it is equal to zero
             if dataset_input[i][j] != 0:
                 memory_list[j] = dataset_input[i][j]
+    # import pickle
+    # l = memory_list
+    # with open("test", "wb") as fp:   #Pickling
+    #    pickle.dump(l, fp)
+    
+    # with open("test", "rb") as fp:   # Unpickling
+    #    b = pickle.load(fp)
+    
+    # print("MemoryList",b)
+    
+    with open("memorylist.txt", "w") as f:
+        print("Saving memory list to 'memorylist.txt'")
+        for s in memory_list:
+            f.write(str(s) +"\n")
+
+    
+
 
     return memory_list
 
@@ -77,7 +95,7 @@ def createMemoryList(dataset_input, memory_list):
 # Params: List<List<FLoat>>, List<Float>
 # Returns: List<List<FLoat>>
 # Function: Remove corresponding redundant indeces from each datapoint
-def removeRedundantData(dataset_input, memory_list):
+def removeRedundantFeatures(dataset_input, memory_list):
     # Declare relevant Dataset
     relevant_data = []
     # Iterate through dataset
@@ -88,7 +106,7 @@ def removeRedundantData(dataset_input, memory_list):
             if memory_list[j] != 0:
                 relevant_data_point.append(dataset_input[i][j])
         relevant_data.append(relevant_data_point)
-    return relevant_data
+    return relevant_data   
 
 def findOutlierIndexes(data_to_plot):
     index_list = data_to_plot[0]
@@ -103,7 +121,7 @@ def findOutlierIndexes(data_to_plot):
                 # print("Adding index",index_list[i], "to indexes to remove")
                 indexes_to_remove.append(int(index_list[i]))
     else: 
-        print("Only than one occurance: ", len(index_list))
+        # print("Only than one occurance: ", len(index_list))
         return indexes_to_remove.append(int(index_list[0]))
     return indexes_to_remove
 
@@ -113,10 +131,6 @@ def findOutlierIndexes(data_to_plot):
 # Function: Return the indexes where the class doesn't equal zero
 def trackTrendForFeature(relevant_data, labels_list, feature_index):
     plot_list = np.array([])
-    # We have 1917 relevant features.
-    # How does it trend across 2000 datapoints
-    # Track trend for particular feature (in this case feature[0])
-    # If feature isn't zero, track it's index in the dataset and record the feature 
    
     for i in range(len(relevant_data)):
         feature = relevant_data[i][feature_index]
@@ -161,7 +175,7 @@ def countClassIfFeatureNonZero(data_to_plot, feature_index):
     
      # Track the ratio of a feature's CLASS_mean/class_mode
     class_correlations = (statistics.mean(classes_list)+1)/(statistics.mode(classes_list)+1)
-    print("Feature", feature_index, " is ", class_correlations, "correlated with class", statistics.mode(classes_list))
+    # print("Feature", feature_index, " is ", class_correlations, "correlated with class", statistics.mode(classes_list))
     
     CORRELATION_TREND.append([feature_index, class_correlations, statistics.mode(classes_list)])
     
@@ -169,7 +183,7 @@ def countClassIfFeatureNonZero(data_to_plot, feature_index):
     indexes_to_pop = np.array(indexes_to_pop).flatten()   
     global INDEXES_TO_REMOVE 
     INDEXES_TO_REMOVE = np.append(INDEXES_TO_REMOVE, indexes_to_pop)
-    print("Number of outliers found", len(INDEXES_TO_REMOVE))
+    # print("Number of outliers found", len(INDEXES_TO_REMOVE))
         
     return class_range
 
@@ -207,10 +221,10 @@ with open("inputs.txt") as file:
         count += 1
     # Create list of redundant data
     memory_list = createMemoryList(dataset_input, memory_list)
-
     # Remove the redundant rows from memory list.
 
-    relevant_data = removeRedundantData(dataset_input, memory_list)
+    relevant_data = removeRedundantFeatures(dataset_input, memory_list)
+    
     #TODO: Iterate through index 0, and find trend for relevant_data[i][0]
     
     
@@ -234,22 +248,23 @@ for i in range(len(relevant_data[0])):
 ## Remove the bad data from the dataset
 # Removes duplicates from INDEXES to REMOVE
 INDEXES_TO_REMOVE = list(dict.fromkeys(INDEXES_TO_REMOVE))
-print("Number of INDEXES_TO_REMOVE:",len(INDEXES_TO_REMOVE))
+# print("Number of INDEXES_TO_REMOVE:",len(INDEXES_TO_REMOVE))
 
 for i, e in reversed(list(enumerate(relevant_data))):
     for j in range(len(INDEXES_TO_REMOVE)):
         if INDEXES_TO_REMOVE[j] == i:
-            print("Popping datapoint at index", i)
+            # print("Popping datapoint at index", i)
             
             relevant_data.pop(i)
             labels_list.pop(i)
 
 print("Relevant data should be less than 2000:",len(relevant_data))
 print("Indexes we removed:", len(INDEXES_TO_REMOVE))
-print("Labels should be equal to the number above:",len(labels_list))
+# print("Labels should be equal to the number above:",len(labels_list))
 from sklearn.preprocessing import StandardScaler
 sc = StandardScaler()
 inputs = sc.fit_transform(relevant_data)
+print("Relevant Data is of shape:", len(relevant_data), len(relevant_data[0]))
 
 # labels = pd.read_csv("labels.txt", sep=" ", header=None)
 from sklearn.preprocessing import OneHotEncoder
@@ -271,10 +286,10 @@ model = Sequential()
 # # Dense( int= next hidden layer dimensions, activation function, input dimensions )
 # # TODO: Test different types and record values
 # # TODO: Justify choice of layer type "Dense" has alternatives
-relevant_dimensions= len(relevant_data[0])
-model.add(Dense(relevant_dimensions//2, activation='relu', input_dim=relevant_dimensions, kernel_initializer='he_uniform')) # This defines the dimensions of the input dimension and 1st hidden layer
+relevant_shape= len(inputs[0])
+model.add(Dense(relevant_shape//2, activation='relu', input_shape=(relevant_shape,), kernel_initializer='he_uniform')) # This defines the dimensions of the input dimension and 1st hidden layer
 model.add(Dropout(0.5)) # We added drop out as half to reduce the overfitting.
-model.add(Dense(relevant_dimensions//19, activation='relu', kernel_initializer='he_uniform'))
+model.add(Dense(relevant_shape//19, activation='relu', kernel_initializer='he_uniform'))
 model.add(Dropout(0.5)) # We added drop out as half to reduce the overfitting.
 model.add(Dense(10, activation='softmax'))
 
@@ -285,29 +300,55 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, epsilon=0.
 
 model.fit(x_train, y_train,  epochs=90,  batch_size=10, shuffle=False)
 
-y_val_pred = model.predict(x_val)
-#Converting predictions to label
-val_pred = list()
-for i in range(len(y_val_pred)):
-    val_pred.append(np.argmax(y_val_pred[i]))
-#Converting one hot encoded test label to label
-val = list()
-for i in range(len(y_val)):
-    val.append(np.argmax(y_val[i]))
-    
-from sklearn.metrics import accuracy_score
-a = accuracy_score(val_pred,val)
-print('[Validation] Accuracy is:', a*100)
+# model.save("saved_model.h5")
 
+# y_val_pred = model.predict(x_val)
+# #Converting predictions to label
+# val_pred = list()
+# for i in range(len(y_val_pred)):
+#     val_pred.append(np.argmax(y_val_pred[i]))
+# #Converting one hot encoded test label to label
+# val = list()
+# for i in range(len(y_val)):
+#     val.append(np.argmax(y_val[i]))
+    
+# from sklearn.metrics import accuracy_score
+# a = accuracy_score(val_pred,val)
+# print('[Validation] Accuracy is:', a*100)
 y_pred = model.predict(x_test)
+print("Shape of Y_predict", y_pred.shape)
+print(np.argmax(y_pred))
+
+def getPredictions(y_pred):
+    CLASSES = []
+    for i in range(len(y_pred)):
+        my_classes = y_pred[i]
+        my_classes = my_classes.tolist()
+        max_class = max(my_classes)
+        predicted_class = my_classes.index(max_class)
+        print('Max class is :', my_classes.index(max_class))
+        CLASSES.append(predicted_class)
+
+    return CLASSES
+
+
+CLASSES = getPredictions(y_pred)
+
+answer = ''.join(map(str, CLASSES))
+print(answer)
+
+# for c in CLASSES:
+#     print(str(c))
+
+
 #Converting predictions to label
-pred = list()
-for i in range(len(y_pred)):
-    pred.append(np.argmax(y_pred[i]))
-#Converting one hot encoded test label to label
-test = list()
-for i in range(len(y_test)):
-    test.append(np.argmax(y_test[i]))    
-from sklearn.metrics import accuracy_score
-b = accuracy_score(pred,test)
-print('[Testing] Accuracy is:', b*100)    
+# pred = list()
+# for i in range(len(y_pred)):
+#     pred.append(np.argmax(y_pred[i]))
+# #Converting one hot encoded test label to label
+# test = list()
+# for i in range(len(y_test)):
+#     test.append(np.argmax(y_test[i]))    
+# from sklearn.metrics import accuracy_score
+# b = accuracy_score(pred,test)
+# print('[Testing] Accuracy is:', b*100)    
