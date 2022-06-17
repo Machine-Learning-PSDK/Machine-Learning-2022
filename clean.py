@@ -22,6 +22,8 @@ import math
 from scipy import stats
 import functools
 import operator
+import pandas as pd    
+
 
 INDEXES_TO_REMOVE = np.empty(shape=(1))
 CORRELATION_TREND = []
@@ -90,11 +92,15 @@ def findOutlierIndexes(data_to_plot):
     classes_list = data_to_plot[2]
     indexes_to_remove = []
     
-    for i in range(len(index_list)):
-        if (values_list[i] >= statistics.mean(values_list)*3):
-            # print("Adding index",index_list[i], "to indexes to remove")
-            indexes_to_remove.append(int(index_list[i]))
-    
+    if(len(values_list)>=2):
+        outlier_criteria = statistics.mean(values_list)+statistics.stdev(values_list)*3
+        for i in range(len(index_list)):
+            if (abs(values_list[i]) > outlier_criteria):
+                # print("Adding index",index_list[i], "to indexes to remove")
+                indexes_to_remove.append(int(index_list[i]))
+    else: 
+        print("Only than one occurance: ", len(index_list))
+        return indexes_to_remove.append(int(index_list[0]))
     return indexes_to_remove
 
         
@@ -228,13 +234,17 @@ for i, e in reversed(list(enumerate(relevant_data))):
             labels_list.pop(i)
 
 print("Relevant data should be less than 2000:",len(relevant_data))
+print("Indexes we removed:", len(INDEXES_TO_REMOVE))
 print("Labels should be equal to the number above:",len(labels_list))
 
-        
+relevant_dataFrame = pd.DataFrame(relevant_data)
+labels_list_dataFrame = pd.DataFrame(relevant_data)
+
+relevant_dataFrame.to_csv('labels_NO_OUTLIERS.csv', index=False)
+labels_list_dataFrame.to_csv('inputs_NO_OUTLIERS.csv', index=False)
     
 plt.scatter(data_to_plot[0], data_to_plot[1] )
 plt.ylabel("Feature X's value")
 plt.xlabel("Index in dataset")
     
-
 # endregion 
