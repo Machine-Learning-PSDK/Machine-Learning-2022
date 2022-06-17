@@ -95,19 +95,26 @@ with open("inputs.txt") as file:
     relevant_data = removeRedundantData(dataset_input, memory_list)
     #TODO: Iterate through index 0, and find trend for relevant_data[i][0]
     
-    
-    
-    plot_list = []
-    # Track trend for particular feature
-    # If feature isn't zero, add it to the plot
+    plot_list = []    
+    # We have 1917 relevant features.
+    # How does it trend across 2000 datapoints
+    # Track trend for particular feature (in this case feature[0])
+    # If feature isn't zero, track it's index in the dataset and record the feature 
     for i in range(len(relevant_data)):
-        if (relevant_data[i][0] != 0):
-            plot_list.append(relevant_data[i][0])
+        if (relevant_data[i][2] != 0):
+            val_to_append =[i , relevant_data[i][2]]
+            print("Value we're appending to the list",val_to_append)
+            # [592, 44.44273879412769]
+            plot_list = np.append( plot_list, val_to_append )
+            print(plot_list)
+            
     
     print("How many times does this feature not equal zero?: ",len(plot_list))
-    print("What value does this one thing equal:",plot_list)
-    plt.plot(plot_list)
-    plt.show()
+    print("What are we plotting:",plot_list)
+#     What are we plotting: [6.23042070e-307 3.56043053e-307 1.37961641e-306 8.90071135e-308
+#     5.92000000e+002 4.44427388e+001]
+    # plt.plot(plot_list)
+    # plt.show()
     
 
 # Relevant data is cleaned data, full scope
@@ -115,86 +122,86 @@ with open("inputs.txt") as file:
 # inputs = pd.read_csv("inputs.txt", sep=" ", header=None)
 
 
-from sklearn.preprocessing import StandardScaler
-sc = StandardScaler()
-inputs = sc.fit_transform(relevant_data)
+# from sklearn.preprocessing import StandardScaler
+# sc = StandardScaler()
+# inputs = sc.fit_transform(relevant_data)
 
-labels = pd.read_csv("labels.txt", sep=" ", header=None)
+# labels = pd.read_csv("labels.txt", sep=" ", header=None)
 
-from sklearn.preprocessing import OneHotEncoder
-ohe = OneHotEncoder()
-labels = ohe.fit_transform(labels).toarray()
-print("Samples:", len(relevant_data), "Labels",len(labels),"Features:",len(relevant_data[0]))
-
-
-x_Train , X_Test , Y_train ,Y_test = train_test_split(inputs, labels ,test_size = 0.2 , random_state= 1 ,shuffle=True)
-# Split the whole 
-X_train , X_val , Y_train, Y_val = train_test_split(x_Train, Y_train ,test_size = 0.25 , random_state= 1 ,shuffle=True)
-
-model = Sequential()
-# Hardcoded, 
-# TODO: Justify why we use these numbers (For the pdf)
-# Dense( int= next hidden layer dimensions, activation function, input dimensions )
-# TODO: Test different types and record values
-# TODO: Justify choice of layer type "Dense" has alternatives
+# from sklearn.preprocessing import OneHotEncoder
+# ohe = OneHotEncoder()
+# labels = ohe.fit_transform(labels).toarray()
+# print("Samples:", len(relevant_data), "Labels",len(labels),"Features:",len(relevant_data[0]))
 
 
+# x_Train , X_Test , Y_train ,Y_test = train_test_split(inputs, labels ,test_size = 0.2 , random_state= 1 ,shuffle=True)
+# # Split the whole 
+# X_train , X_val , Y_train, Y_val = train_test_split(x_Train, Y_train ,test_size = 0.25 , random_state= 1 ,shuffle=True)
+
+# model = Sequential()
+# # Hardcoded, 
+# # TODO: Justify why we use these numbers (For the pdf)
+# # Dense( int= next hidden layer dimensions, activation function, input dimensions )
+# # TODO: Test different types and record values
+# # TODO: Justify choice of layer type "Dense" has alternatives
+
+
+
+# # relevant_dimensions= len(relevant_data[0])
+# # model.add(Dense(558, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
+# # # model.add(Dense(relevant_dimensions/2, activation='relu'))
+# # # model.add(Dense(relevant_dimensions/4, activation='relu'))
+# # # model.add(Dense(relevant_dimensions/8, activation='relu'))
+# # model.add(Dense(10, activation='softmax'))  # This defines output layer dimensions
 
 # relevant_dimensions= len(relevant_data[0])
-# model.add(Dense(558, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
-# # model.add(Dense(relevant_dimensions/2, activation='relu'))
+# model.add(Dense(relevant_dimensions//8, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
+# model.add(Dense(relevant_dimensions//8, activation='sigmoid'))
+
+# model.add(Dropout(0.5))
+# model.add(Dense(10, activation='softmax'))
+# # model.add(Dense(relevant_dimensions/2, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
 # # model.add(Dense(relevant_dimensions/4, activation='relu'))
-# # model.add(Dense(relevant_dimensions/8, activation='relu'))
-# model.add(Dense(10, activation='softmax'))  # This defines output layer dimensions
-
-relevant_dimensions= len(relevant_data[0])
-model.add(Dense(relevant_dimensions//8, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
-model.add(Dense(relevant_dimensions//8, activation='sigmoid'))
-
-model.add(Dropout(0.5))
-model.add(Dense(10, activation='softmax'))
-# model.add(Dense(relevant_dimensions/2, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
-# model.add(Dense(relevant_dimensions/4, activation='relu'))
-# model.add(Dense(10, activation='softmax'))  # This defines output layer dimensions
-# model.load_weights('my_model_weights.h5')
-# Compile the model
+# # model.add(Dense(10, activation='softmax'))  # This defines output layer dimensions
+# # model.load_weights('my_model_weights.h5')
+# # Compile the model
 
 
 
-# TODO: Justify why we picked these specific optimizer, loss and metric parameters
-model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, epsilon=0.004, amsgrad=True), 
-              loss='categorical_crossentropy', 
-              metrics=['accuracy'])
+# # TODO: Justify why we picked these specific optimizer, loss and metric parameters
+# model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, epsilon=0.004, amsgrad=True), 
+#               loss='categorical_crossentropy', 
+#               metrics=['accuracy'])
 
-model.fit(X_train, Y_train,  epochs=30,  batch_size=25)
+# model.fit(X_train, Y_train,  epochs=30,  batch_size=25)
 
-# model.save_weights('model_weights.h5')
+# # model.save_weights('model_weights.h5')
 
-y_pred = model.predict(X_val)
-#Converting predictions to label
-pred = list()
-for i in range(len(y_pred)):
-    pred.append(np.argmax(y_pred[i]))
-#Converting one hot encoded test label to label
-test = list()
-for i in range(len(Y_val)):
-    test.append(np.argmax(Y_val[i]))
+# y_pred = model.predict(X_val)
+# #Converting predictions to label
+# pred = list()
+# for i in range(len(y_pred)):
+#     pred.append(np.argmax(y_pred[i]))
+# #Converting one hot encoded test label to label
+# test = list()
+# for i in range(len(Y_val)):
+#     test.append(np.argmax(Y_val[i]))
     
-from sklearn.metrics import accuracy_score
-a = accuracy_score(pred,test)
-print('[Validation] Accuracy is:', a*100)
+# from sklearn.metrics import accuracy_score
+# a = accuracy_score(pred,test)
+# print('[Validation] Accuracy is:', a*100)
 
-y_pred = model.predict(X_Test)
-#Converting predictions to label
-pred = list()
-for i in range(len(y_pred)):
-    pred.append(np.argmax(y_pred[i]))
-#Converting one hot encoded test label to label
-test = list()
-for i in range(len(Y_test)):
-    test.append(np.argmax(Y_test[i]))
+# y_pred = model.predict(X_Test)
+# #Converting predictions to label
+# pred = list()
+# for i in range(len(y_pred)):
+#     pred.append(np.argmax(y_pred[i]))
+# #Converting one hot encoded test label to label
+# test = list()
+# for i in range(len(Y_test)):
+#     test.append(np.argmax(Y_test[i]))
     
-from sklearn.metrics import accuracy_score
-b = accuracy_score(pred,test)
-print('[Testing] Accuracy is:', b*100)    
+# from sklearn.metrics import accuracy_score
+# b = accuracy_score(pred,test)
+# print('[Testing] Accuracy is:', b*100)    
 

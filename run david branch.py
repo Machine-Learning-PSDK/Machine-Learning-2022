@@ -95,22 +95,8 @@ with open("inputs.txt") as file:
     relevant_data = removeRedundantData(dataset_input, memory_list)
     #TODO: Iterate through index 0, and find trend for relevant_data[i][0]
     
-    
-    
-    # plot_list = []
-    # # Track trend for particular feature
-    # for i in range(len(relevant_data)):
-    #     plot_list.append(relevant_data[i][0])
-    
-    
-    plt.plot(relevant_data[0])
-    plt.show()
-    
 
 # Relevant data is cleaned data, full scope
-
-# inputs = pd.read_csv("inputs.txt", sep=" ", header=None)
-
 
 from sklearn.preprocessing import StandardScaler
 sc = StandardScaler()
@@ -121,10 +107,8 @@ labels = pd.read_csv("labels.txt", sep=" ", header=None)
 from sklearn.preprocessing import OneHotEncoder
 ohe = OneHotEncoder()
 labels = ohe.fit_transform(labels).toarray()
-print(len(relevant_data[0]))
 
 x_Train , X_Test , Y_train ,Y_test = train_test_split(inputs, labels ,test_size = 0.2 , random_state= 1 ,shuffle=True)
-# Split the whole 
 X_train , X_val , Y_train, Y_val = train_test_split(x_Train, Y_train ,test_size = 0.25 , random_state= 1 ,shuffle=True)
 
 model = Sequential()
@@ -133,9 +117,6 @@ model = Sequential()
 # Dense( int= next hidden layer dimensions, activation function, input dimensions )
 # TODO: Test different types and record values
 # TODO: Justify choice of layer type "Dense" has alternatives
-
-
-
 # relevant_dimensions= len(relevant_data[0])
 # model.add(Dense(558, activation='relu', input_dim=relevant_dimensions)) # This defines the dimensions of the input dimension and 1st hidden layer
 # # model.add(Dense(relevant_dimensions/2, activation='relu'))
