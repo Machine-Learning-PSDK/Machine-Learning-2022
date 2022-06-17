@@ -285,6 +285,8 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, epsilon=0.
 
 model.fit(x_train, y_train,  epochs=90,  batch_size=10, shuffle=False)
 
+model.save("my_model.h5")
+
 y_val_pred = model.predict(x_val)
 #Converting predictions to label
 val_pred = list()
@@ -311,3 +313,5 @@ for i in range(len(y_test)):
 from sklearn.metrics import accuracy_score
 b = accuracy_score(pred,test)
 print('[Testing] Accuracy is:', b*100)    
+
+model.summary()
