@@ -7,7 +7,6 @@ from matplotlib.cbook import flatten
 import pandas as pd
 import numpy as np
 import scipy
-from sklearn.manifold import LocallyLinearEmbedding
 from tensorflow import keras
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
@@ -16,18 +15,16 @@ from keras.layers import Dropout
 import tensorflow as tf
 from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
-
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 import statistics
 import math
 from scipy import stats
-
 import functools
 import operator
-import pandas as pd   
+import pandas as pd    
 
- 
+
 INDEXES_TO_REMOVE = np.empty(shape=(1))
 CORRELATION_TREND = []
 
@@ -39,7 +36,6 @@ def readLabels(file_location):
     for i in labels:
         labels_list.append(labels[i])
     return labels_list[0]
-
 
 # Params: List<String>
 # Returns: List<Float>, List<Float>
@@ -107,7 +103,7 @@ def findOutlierIndexes(data_to_plot):
         return indexes_to_remove.append(int(index_list[0]))
     return indexes_to_remove
 
-
+        
 # Params: List<List<FLoat>>, List<Int>, Int
 # Returns: List< List<Float>, List<FLoat>, List<Float> >
 # Function: Return the indexes where the class doesn't equal zero
@@ -117,7 +113,7 @@ def trackTrendForFeature(relevant_data, labels_list, feature_index):
     # How does it trend across 2000 datapoints
     # Track trend for particular feature (in this case feature[0])
     # If feature isn't zero, track it's index in the dataset and record the feature 
-   
+    
     for i in range(len(relevant_data)):
         feature = relevant_data[i][feature_index]
         # record datapoint index and feature value in plot_list
@@ -159,7 +155,7 @@ def countClassIfFeatureNonZero(data_to_plot, feature_index):
         class_range[int(classes_list[i])] += 1
     
     
-     # Track the ratio of a feature's CLASS_mean/class_mode
+    # Track the ratio of a feature's CLASS_mean/class_mode
     class_correlations = (statistics.mean(classes_list)+1)/(statistics.mode(classes_list)+1)
     print("Feature", feature_index, " is ", class_correlations, "correlated with class", statistics.mode(classes_list))
     
@@ -175,9 +171,8 @@ def countClassIfFeatureNonZero(data_to_plot, feature_index):
 
 
 # Functions Ends
-
-
-# region Functions Ends
+    
+    
 
 # region Pipeline Starts
 # region Pipeline
@@ -199,7 +194,6 @@ with open("inputs.txt") as file:
         # Convert line to array and initialize memory list for single data point
         converted = convertLineToDataPointAndMemoryList(line)
         # Array of zeroes and non-zeroes representing redundancy)
-        # Array of zeroes and non-zeroes representing redundancy
         memory_list = converted[1]  # Initializes length of mem list to match data point
         val_list = converted[0]
         dataset_input.append(val_list)  # append each word as element in datapoint
@@ -210,27 +204,22 @@ with open("inputs.txt") as file:
 
     # Remove the redundant rows from memory list.
 
-    relevant_data = removeRedundantData(dataset_input, memory_list)
-    #TODO: Iterate through index 0, and find trend for relevant_data[i][0]
-    
-    
-            
+relevant_data = removeRedundantData(dataset_input, memory_list)
+#TODO: Iterate through index 0, and find trend for relevant_data[i][0]
+
+
+
 for i in range(len(relevant_data[0])):
     data_to_plot = trackTrendForFeature(relevant_data, labels_list, i) # [index_list, value_list, label_list]
-    classCountForFeatureX = countClassIfFeatureNonZero(data_to_plot, i)    
-     
-     ## Flattens the multidimensional INDEXES_TO_REMOVE
+    classCountForFeatureX = countClassIfFeatureNonZero(data_to_plot, i)
+    
+    ## Flattens the multidimensional INDEXES_TO_REMOVE
     
     tempToRemove = np.array(INDEXES_TO_REMOVE)
     flatToRemove = tempToRemove.flatten()
     
-# for i in range(len(relevant_data[0])):
-#     data_to_plot = trackTrendForFeature(relevant_data, labels_list, i) # [index_list, value_list, label_list]
-#     classCountForFeatureX = countClassIfFeatureNonZero(data_to_plot, i)
-# # Relevant data is cleaned data, full scope
-
-# inputs = pd.read_csv("inputs.txt", sep=" ", header=None)
-   # print(classCountForFeatureX, i)
+    
+    # print(classCountForFeatureX, i)
 ## Remove the bad data from the dataset
 # Removes duplicates from INDEXES to REMOVE
 INDEXES_TO_REMOVE = list(dict.fromkeys(INDEXES_TO_REMOVE))
@@ -247,67 +236,15 @@ for i, e in reversed(list(enumerate(relevant_data))):
 print("Relevant data should be less than 2000:",len(relevant_data))
 print("Indexes we removed:", len(INDEXES_TO_REMOVE))
 print("Labels should be equal to the number above:",len(labels_list))
-from sklearn.preprocessing import StandardScaler
-sc = StandardScaler()
-inputs = sc.fit_transform(relevant_data)
 
-# labels = pd.read_csv("labels.txt", sep=" ", header=None)
-from sklearn.preprocessing import OneHotEncoder
-ohe = OneHotEncoder()
-labels_list_indexes = []
+relevant_dataFrame = pd.DataFrame(relevant_data)
+labels_list_dataFrame = pd.DataFrame(relevant_data)
 
-for i in labels_list:
-    labels_list_indexes.append([i])
-
-labels = ohe.fit_transform(labels_list_indexes).toarray()
-
-
-x_train , x_test , y_train ,y_test = train_test_split(inputs, labels ,test_size = 0.2 , random_state= 1 ,shuffle=True)
-# Split the whole 
-x_train , x_val , y_train, y_val = train_test_split(x_train, y_train ,test_size = 0.25 , random_state= 1 ,shuffle=True)
-model = Sequential()
-# # Hardcoded, 
-# # TODO: Justify why we use these numbers (For the pdf)
-# # Dense( int= next hidden layer dimensions, activation function, input dimensions )
-# # TODO: Test different types and record values
-# # TODO: Justify choice of layer type "Dense" has alternatives
-relevant_dimensions= len(relevant_data[0])
-model.add(Dense(relevant_dimensions//2, activation='relu', input_dim=relevant_dimensions, kernel_initializer='he_uniform')) # This defines the dimensions of the input dimension and 1st hidden layer
-model.add(Dropout(0.5)) # We added drop out as half to reduce the overfitting.
-model.add(Dense(relevant_dimensions//19, activation='relu', kernel_initializer='he_uniform'))
-model.add(Dropout(0.5)) # We added drop out as half to reduce the overfitting.
-model.add(Dense(10, activation='softmax'))
-
-# TODO: Justify why we picked these specific optimizer, loss and metric parameters
-model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, epsilon=0.004, amsgrad=True), 
-              loss='categorical_crossentropy', 
-              metrics=['accuracy'])
-
-model.fit(x_train, y_train,  epochs=90,  batch_size=10, shuffle=False)
-
-y_val_pred = model.predict(x_val)
-#Converting predictions to label
-val_pred = list()
-for i in range(len(y_val_pred)):
-    val_pred.append(np.argmax(y_val_pred[i]))
-#Converting one hot encoded test label to label
-val = list()
-for i in range(len(y_val)):
-    val.append(np.argmax(y_val[i]))
+relevant_dataFrame.to_csv('labels_NO_OUTLIERS.csv', index=False)
+labels_list_dataFrame.to_csv('inputs_NO_OUTLIERS.csv', index=False)
     
-from sklearn.metrics import accuracy_score
-a = accuracy_score(val_pred,val)
-print('[Validation] Accuracy is:', a*100)
-
-y_pred = model.predict(x_test)
-#Converting predictions to label
-pred = list()
-for i in range(len(y_pred)):
-    pred.append(np.argmax(y_pred[i]))
-#Converting one hot encoded test label to label
-test = list()
-for i in range(len(y_test)):
-    test.append(np.argmax(y_test[i]))    
-from sklearn.metrics import accuracy_score
-b = accuracy_score(pred,test)
-print('[Testing] Accuracy is:', b*100)    
+plt.scatter(data_to_plot[0], data_to_plot[1] )
+plt.ylabel("Feature X's value")
+plt.xlabel("Index in dataset")
+    
+# endregion 

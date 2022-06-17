@@ -237,14 +237,7 @@ print("Relevant data should be less than 2000:",len(relevant_data))
 print("Indexes we removed:", len(INDEXES_TO_REMOVE))
 print("Labels should be equal to the number above:",len(labels_list))
 
-relevant_dataFrame = pd.DataFrame(relevant_data)
-labels_list_dataFrame = pd.DataFrame(relevant_data)
 
-relevant_dataFrame.to_csv('labels_NO_OUTLIERS.csv', index=False)
-labels_list_dataFrame.to_csv('inputs_NO_OUTLIERS.csv', index=False)
     
-plt.scatter(data_to_plot[0], data_to_plot[1] )
-plt.ylabel("Feature X's value")
-plt.xlabel("Index in dataset")
     
 # endregion 
