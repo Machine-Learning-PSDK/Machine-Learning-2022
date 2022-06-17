@@ -21,6 +21,9 @@ from sklearn.preprocessing import OneHotEncoder
 import statistics
 import math
 from scipy import stats
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
+
 
 INDEXES_TO_REMOVE = np.empty(shape=(1))
 CORRELATION_TREND = []
@@ -231,7 +234,7 @@ for i, e in reversed(list(enumerate(relevant_data))):
             
             relevant_data.pop(i)
             labels_list.pop(i)
-from sklearn.preprocessing import StandardScaler
+            
 sc = StandardScaler()
 inputs = sc.fit_transform(relevant_data)
 
@@ -273,7 +276,6 @@ val = list()
 for i in range(len(y_val)):
     val.append(np.argmax(y_val[i]))
     
-from sklearn.metrics import accuracy_score
 a = accuracy_score(val_pred,val)
 print('[Validation] Accuracy is:', a*100)
 
@@ -286,6 +288,6 @@ for i in range(len(y_pred)):
 test = list()
 for i in range(len(y_test)):
     test.append(np.argmax(y_test[i]))    
-from sklearn.metrics import accuracy_score
+
 b = accuracy_score(pred,test)
 print('[Testing] Accuracy is:', b*100)    
