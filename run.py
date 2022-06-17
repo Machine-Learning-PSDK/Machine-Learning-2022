@@ -143,15 +143,13 @@ sc = StandardScaler()
 inputs = sc.fit_transform(relevant_data)
 
 
-# from sklearn.preprocessing import OneHotEncoder
-# ohe = OneHotEncoder()
-# labels = ohe.fit_transform(labels).toarray()
+from sklearn.preprocessing import OneHotEncoder
+ohe = OneHotEncoder()
+labels = ohe.fit_transform(labels).toarray()
 
-x_Train , X_Test , Y_train ,Y_test = train_test_split(inputs, labels ,test_size = 0.2 , random_state= 1 ,shuffle=True)
+x_train , x_test , y_train ,y_test = train_test_split(inputs, labels ,test_size = 0.2 , random_state= 1 ,shuffle=True)
 # Split the whole 
-X_train , X_val , Y_train, Y_val = train_test_split(x_Train, Y_train ,test_size = 0.25 , random_state= 1 ,shuffle=True)
-
-print(Y_val.shape)
+x_train , x_val , y_train, y_val = train_test_split(x_train, y_train ,test_size = 0.25 , random_state= 1 ,shuffle=True)
 
 model = Sequential()
 # Hardcoded, 
@@ -162,43 +160,41 @@ model = Sequential()
 
 relevant_dimensions= len(relevant_data[0])
 model.add(Dense(relevant_dimensions//2, activation='relu', input_dim=relevant_dimensions, kernel_initializer='he_uniform')) # This defines the dimensions of the input dimension and 1st hidden layer
-model.add(Dropout(0.5)) # We added drop out as half to reduce the underfitting.
+model.add(Dropout(0.5)) # We added drop out as half to reduce the overfitting.
 model.add(Dense(relevant_dimensions//19, activation='relu', kernel_initializer='he_uniform'))
-model.add(Dropout(0.5)) # We added drop out as half to reduce the underfitting.
+model.add(Dropout(0.5)) # We added drop out as half to reduce the overfitting.
 model.add(Dense(10, activation='softmax'))
 
 # TODO: Justify why we picked these specific optimizer, loss and metric parameters
 model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001, epsilon=0.004, amsgrad=True), 
-              loss='sparse_categorical_crossentropy', 
+              loss='categorical_crossentropy', 
               metrics=['accuracy'])
 
-model.fit(X_train, Y_train,  epochs=90,  batch_size=25)
+model.fit(x_train, y_train,  epochs=90,  batch_size=10, shuffle=False)
 
-# model.save_weights('model_weights.h5')
-
-y_pred = model.predict(X_val)
+y_val_pred = model.predict(x_val)
 #Converting predictions to label
-pred = list()
-for i in range(len(y_pred)):
-    pred.append(np.argmax(y_pred[i]))
+val_pred = list()
+for i in range(len(y_val_pred)):
+    val_pred.append(np.argmax(y_val_pred[i]))
 #Converting one hot encoded test label to label
-test = list()
-for i in range(len(Y_val)):
-    test.append(np.argmax(Y_val[i]))
+val = list()
+for i in range(len(y_val)):
+    val.append(np.argmax(y_val[i]))
     
 from sklearn.metrics import accuracy_score
-a = accuracy_score(pred,test)
+a = accuracy_score(val_pred,val)
 print('[Validation] Accuracy is:', a*100)
 
-y_pred = model.predict(X_Test)
+y_pred = model.predict(x_test)
 #Converting predictions to label
 pred = list()
 for i in range(len(y_pred)):
     pred.append(np.argmax(y_pred[i]))
 #Converting one hot encoded test label to label
 test = list()
-for i in range(len(Y_test)):
-    test.append(np.argmax(Y_test[i]))
+for i in range(len(y_test)):
+    test.append(np.argmax(y_test[i]))
     
 from sklearn.metrics import accuracy_score
 b = accuracy_score(pred,test)

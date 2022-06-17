@@ -1,17 +1,37 @@
 # Importing the libraries
+from cProfile import label
+from os import remove, stat
 from turtle import shape
 import pandas as pd
 import numpy as np
-# from tensorflow import keras
-# from sklearn.model_selection import train_test_split
-# from keras.models import Sequential
-# from keras.layers import Dense
-# from keras.layers import Dropout
+import scipy
+from tensorflow import keras
+from sklearn.model_selection import train_test_split
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import Dropout
 import tensorflow as tf
-# from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
-# from sklearn.preprocessing import StandardScaler
-# from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
+import statistics
+import math
+from scipy import stats
+import functools
+import operator
+
+INDEXES_TO_REMOVE = []
+CORRELATION_TREND = []
+
+
+def readLabels(file_location):
+    labels = pd.read_csv(file_location, sep=" ", header=None)
+    labels_list = []
+
+    for i in labels:
+        labels_list.append(labels[i])
+    return labels_list[0]
 
 # Params: List<String>
 # Returns: List<Float>, List<Float>
@@ -62,11 +82,24 @@ def removeRedundantData(dataset_input, memory_list):
         relevant_data.append(relevant_data_point)
     return relevant_data
 
+def findOutlierIndexes(data_to_plot):
+    index_list = data_to_plot[0]
+    values_list = data_to_plot[1]
+    classes_list = data_to_plot[2]
+    indexes_to_remove = []
+    
+    for i in range(len(index_list)):
+        if (values_list[i] >= statistics.mean(values_list)*3):
+            print("Adding index",index_list[i], "to indexes to remove")
+            indexes_to_remove.append(int(index_list[i]))
+    
+    return indexes_to_remove
 
+        
 # Params: List<List<FLoat>>, List<Int>, Int
 # Returns: List< List<Float>, List<FLoat>, List<Float> >
 # Function: Return the indexes where the class doesn't equal zero
-def trackTrendForFeature(relevant_data, labels_list, index):
+def trackTrendForFeature(relevant_data, labels_list, feature_index):
     plot_list = np.array([])
     # We have 1917 relevant features.
     # How does it trend across 2000 datapoints
@@ -74,7 +107,7 @@ def trackTrendForFeature(relevant_data, labels_list, index):
     # If feature isn't zero, track it's index in the dataset and record the feature 
     
     for i in range(len(relevant_data)):
-        feature = relevant_data[i][index]
+        feature = relevant_data[i][feature_index]
         # record datapoint index and feature value in plot_list
         if (feature != 0):
             val_to_append =[i ,feature, labels_list[i]]
@@ -102,15 +135,28 @@ def trackTrendForFeature(relevant_data, labels_list, index):
     return [index_list, value_list, class_list]
 
 #  Returns the number of times a class has shown up in the data set, while a specified feature was non zero
-def countClassIfFeatureNonZero(data_to_plot, index):
-    data_to_plot = trackTrendForFeature(relevant_data, labels_list, index) # [index_list, value_list, label_list]
+def countClassIfFeatureNonZero(data_to_plot, feature_index):
+    data_to_plot = trackTrendForFeature(relevant_data, labels_list, feature_index) # [feature_index_list, value_list, label_list]
     classes_list = data_to_plot[2]
+    values_list = data_to_plot[1]
+    index_list = data_to_plot[0]
     class_range = np.zeros(shape=(10))
+    
+    # Count classes and store in onehot form
     for i in range(len(classes_list)):
         class_range[int(classes_list[i])] += 1
+    
+    
+    # Track the ratio of a feature's CLASS_mean/class_mode
+    class_correlations = statistics.mean(classes_list)/statistics.mode(classes_list)
+    print("Feature", feature_index, " is ", class_correlations, "correlated with class", statistics.mode(classes_list))
+    
+    CORRELATION_TREND.append([feature_index, class_correlations, statistics.mode(classes_list)])
+    
+    indexes_to_pop = findOutlierIndexes(data_to_plot)
+    INDEXES_TO_REMOVE.append(indexes_to_pop)
+    print("INDEXES_TO_REMOVE:",len(INDEXES_TO_REMOVE))
         
-    # plt.plot(range(10),class_range)
-    # plt.show()
     return class_range
 
 
@@ -126,13 +172,7 @@ dataset_class = []
 count = 0  # count number of rows we've ran through
 
 # Open up the data and clean it
-def readLabels(file_location):
-    labels = pd.read_csv(file_location, sep=" ", header=None)
-    labels_list = []
 
-    for i in labels:
-        labels_list.append(labels[i])
-    return labels_list[0]
 labels_list = readLabels("labels.txt")
 
 with open("inputs.txt") as file:
@@ -143,7 +183,7 @@ with open("inputs.txt") as file:
         val_list = []
         # Convert line to array and initialize memory list for single data point
         converted = convertLineToDataPointAndMemoryList(line)
-        # Array of zeroes and non-zeroes representing redundancy
+        # Array of zeroes and non-zeroes representing redundancy)
         memory_list = converted[1]  # Initializes length of mem list to match data point
         val_list = converted[0]
         dataset_input.append(val_list)  # append each word as element in datapoint
@@ -158,11 +198,30 @@ relevant_data = removeRedundantData(dataset_input, memory_list)
 #TODO: Iterate through index 0, and find trend for relevant_data[i][0]
 
 
+
+for i in range(700,710):
+    data_to_plot = trackTrendForFeature(relevant_data, labels_list, i) # [index_list, value_list, label_list]
+    classCountForFeatureX = countClassIfFeatureNonZero(data_to_plot, i)
     
-data_to_plot = trackTrendForFeature(relevant_data, labels_list, 77) # [index_list, value_list, label_list]
-classCountForFeatureX = countClassIfFeatureNonZero(data_to_plot, 77)
-print(classCountForFeatureX)
+    print("INDEXES_TO_REMOVE:",len(INDEXES_TO_REMOVE))
+    INDEXES_TO_REMOVE
+    out = []
+    for sublist in INDEXES_TO_REMOVE:
+        out.extend(sublist)
     
+    print(out)
+    
+    # print(classCountForFeatureX, i)
+## Remove the bad data from the dataset
+for i, e in reversed(list(enumerate(relevant_data))):
+    for j in INDEXES_TO_REMOVE:
+        if INDEXES_TO_REMOVE[j] == relevant_data[i]:
+            print("Supposed to pop index", i)
+            relevant_data.pop(i)
+            labels_list.pop(i)
+
+print("Relevant data should be less than 2000",len(relevant_data))
+        
     
 plt.scatter(data_to_plot[0], data_to_plot[1] )
 plt.ylabel("Feature X's value")
