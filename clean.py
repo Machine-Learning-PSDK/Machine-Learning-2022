@@ -1,7 +1,9 @@
 # Importing the libraries
 from cProfile import label
 from os import remove, stat
+from tempfile import TemporaryDirectory
 from turtle import shape
+from matplotlib.cbook import flatten
 import pandas as pd
 import numpy as np
 import scipy
@@ -21,7 +23,7 @@ from scipy import stats
 import functools
 import operator
 
-INDEXES_TO_REMOVE = []
+INDEXES_TO_REMOVE = np.empty(shape=(1))
 CORRELATION_TREND = []
 
 
@@ -90,7 +92,7 @@ def findOutlierIndexes(data_to_plot):
     
     for i in range(len(index_list)):
         if (values_list[i] >= statistics.mean(values_list)*3):
-            print("Adding index",index_list[i], "to indexes to remove")
+            # print("Adding index",index_list[i], "to indexes to remove")
             indexes_to_remove.append(int(index_list[i]))
     
     return indexes_to_remove
@@ -148,14 +150,16 @@ def countClassIfFeatureNonZero(data_to_plot, feature_index):
     
     
     # Track the ratio of a feature's CLASS_mean/class_mode
-    class_correlations = statistics.mean(classes_list)/statistics.mode(classes_list)
+    class_correlations = (statistics.mean(classes_list)+1)/(statistics.mode(classes_list)+1)
     print("Feature", feature_index, " is ", class_correlations, "correlated with class", statistics.mode(classes_list))
     
     CORRELATION_TREND.append([feature_index, class_correlations, statistics.mode(classes_list)])
     
     indexes_to_pop = findOutlierIndexes(data_to_plot)
-    INDEXES_TO_REMOVE.append(indexes_to_pop)
-    print("INDEXES_TO_REMOVE:",len(INDEXES_TO_REMOVE))
+    indexes_to_pop = np.array(indexes_to_pop).flatten()   
+    global INDEXES_TO_REMOVE 
+    INDEXES_TO_REMOVE = np.append(INDEXES_TO_REMOVE, indexes_to_pop)
+    print("Number of outliers found", len(INDEXES_TO_REMOVE))
         
     return class_range
 
@@ -199,28 +203,33 @@ relevant_data = removeRedundantData(dataset_input, memory_list)
 
 
 
-for i in range(700,710):
+for i in range(len(relevant_data[0])):
     data_to_plot = trackTrendForFeature(relevant_data, labels_list, i) # [index_list, value_list, label_list]
     classCountForFeatureX = countClassIfFeatureNonZero(data_to_plot, i)
     
-    print("INDEXES_TO_REMOVE:",len(INDEXES_TO_REMOVE))
-    INDEXES_TO_REMOVE
-    out = []
-    for sublist in INDEXES_TO_REMOVE:
-        out.extend(sublist)
+    ## Flattens the multidimensional INDEXES_TO_REMOVE
     
-    print(out)
+    tempToRemove = np.array(INDEXES_TO_REMOVE)
+    flatToRemove = tempToRemove.flatten()
+    
     
     # print(classCountForFeatureX, i)
 ## Remove the bad data from the dataset
+# Removes duplicates from INDEXES to REMOVE
+INDEXES_TO_REMOVE = list(dict.fromkeys(INDEXES_TO_REMOVE))
+print("Number of INDEXES_TO_REMOVE:",len(INDEXES_TO_REMOVE))
+
 for i, e in reversed(list(enumerate(relevant_data))):
-    for j in INDEXES_TO_REMOVE:
-        if INDEXES_TO_REMOVE[j] == relevant_data[i]:
-            print("Supposed to pop index", i)
+    for j in range(len(INDEXES_TO_REMOVE)):
+        if INDEXES_TO_REMOVE[j] == i:
+            print("Popping datapoint at index", i)
+            
             relevant_data.pop(i)
             labels_list.pop(i)
 
-print("Relevant data should be less than 2000",len(relevant_data))
+print("Relevant data should be less than 2000:",len(relevant_data))
+print("Labels should be equal to the number above:",len(labels_list))
+
         
     
 plt.scatter(data_to_plot[0], data_to_plot[1] )
